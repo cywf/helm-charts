@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wazuh-agent
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: wazuh-agent
+  template:
+    metadata:
+      labels:
+        app: wazuh-agent
+    spec:
+      containers:
+        - name: wazuh-agent
+          image: wazuh/wazuh-agent:latest
+          env:
+            - name: WAZUH_MANAGER
+              value: "<INSERT ZEROTIER IP HERE>"
+            - name: WAZUH_AGENT_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: var-run
+              mountPath: /var/run/docker.sock
+              readOnly: true
+          securityContext:
+            privileged: true
+      volumes:
+        - name: var-run
+          hostPath:
+            path: /var/run/docker.sock
+      nodeSelector:
+        <INSERT YOUR NODE SELECTOR HERE>
+      tolerations:
+        - key: <INSERT YOUR TOLERATIONS HERE>
+          operator: "Equal"
+          value: <INSERT YOUR TOLERATIONS VALUE HERE>
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wazuh-agent
+  labels:
+    app: wazuh-agent
+spec:
+  type: ClusterIP
+  ports:
+    - name: wazuh-agent
+      port: 1514
+      targetPort: 1514
+  selector:
+    app: wazuh-agent
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portainer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: portainer
+  template:
+    metadata:
+      labels:
+        app: portainer
+    spec:
+      containers:
+        - name: portainer
+          image: portainer/portainer-ce:latest
+          command:
+            - /portainer
+          ports:
+            - name: portainer
+              containerPort: 9000
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          env:
+            - name: TZ
+              value: <INSERT YOUR TIMEZONE HERE>
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9000
+            initialDelaySeconds: 60
+            periodSeconds: 60
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9000
+            initialDelaySeconds: 60
+            periodSeconds: 60
+      volumes:
+        - name: data
+          hostPath:
+            path: /data
+      nodeSelector:
+        <INSERT YOUR NODE SELECTOR HERE>
+      tolerations:
+        - key: <INSERT YOUR TOLERATIONS HERE>
+          operator: "Equal"
+          value: <INSERT YOUR TOLERATIONS VALUE HERE>
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: portainer
+  labels:
+    app: portainer
+spec:
+  type: ClusterIP
+  ports:
+    - name: portainer
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: portainer
