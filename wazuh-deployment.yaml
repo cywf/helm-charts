@@ -1,3 +1,5 @@
+# here we have a Helm chart that deploys the Wazuh agent to a cluster of nodes, where you can specify your own node selector and tolerations. We also set up a service to manage the Wazuh agent
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,8 +34,7 @@ spec:
         - name: var-run
           hostPath:
             path: /var/run/docker.sock
-      nodeSelector:
-        <INSERT YOUR NODE SELECTOR HERE>
+      nodeSelector: <INSERT YOUR NODE SELECTOR HERE>
       tolerations:
         - key: <INSERT YOUR TOLERATIONS HERE>
           operator: "Equal"
@@ -100,8 +101,7 @@ spec:
         - name: data
           hostPath:
             path: /data
-      nodeSelector:
-        <INSERT YOUR NODE SELECTOR HERE>
+      nodeSelector: <INSERT YOUR NODE SELECTOR HERE>
       tolerations:
         - key: <INSERT YOUR TOLERATIONS HERE>
           operator: "Equal"
