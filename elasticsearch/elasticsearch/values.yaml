@@ -1,0 +1,34 @@
+## Default values for elasticsearch.
+##
+image:
+  repository: docker.elastic.co/elasticsearch/elasticsearch
+  tag: 7.12.1
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+resources:
+  limits:
+    cpu: 1
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 512Mi
+
+service:
+  type: ClusterIP
+  port: 9200
+
+network:
+  zerotierNetworkId: "zerotier_network_id"
+  zerotierToken: "zerotier_api_token"
+
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+  path: /elasticsearch
+  hosts:
+    - elasticsearch.example.com

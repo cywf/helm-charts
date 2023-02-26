@@ -1,0 +1,1 @@
+This configuration will deploy the mitre/attack-navigator image and expose port 80. It sets the ATTACK_NAVIGATOR_BASE_URL environment variable to /attack-navigator. It also creates an ingress resource that will route requests to attack-navigator.example.com/attack-navigator to the deployment.

@@ -1,0 +1,148 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "docker.fullname" . }}
+  labels:
+    {{- include "docker.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "docker.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "docker.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "docker.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+---
+
+# templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "docker.fullname" . }}
+  labels:
+    app: {{ include "docker.name" . }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "docker.name" . }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ include "docker.name" . }}
+    spec:
+      containers:
+        - name: {{ include "docker.name" . }}
+          image: {{ .Values.docker.image }}
+          ports:
+            - containerPort: {{ .Values.docker.port }}
+          env:
+            - name: DOCKER_HOST
+              value: tcp://0.0.0.0:{{ .Values.docker.port }}
+          volumeMounts:
+            - name: docker-socket
+              mountPath: /var/run/docker.sock
+      volumes:
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+---
+# This creates a network for Docker to use
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "docker.fullname" . }}-network
+  labels:
+    app: {{ include "docker.name" . }}
+spec:
+  selector:
+    app: {{ include "docker.name" . }}
+  ports:
+    - name: docker
+      port: {{ .Values.docker.port }}
+      targetPort: {{ .Values.docker.port }}
+      protocol: TCP
+  clusterIP: None
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "docker.fullname" . }}-init-script
+  labels:
+    app: {{ include "docker.name" . }}
+data:
+  init-script.sh: |-
+    #!/bin/bash
+    set -e
+    echo "Creating Docker network"
+    docker network create --driver bridge {{ .Values.docker.networkName }}
+    echo "Adding Docker to Zerotier network"
+    sudo zerotier-cli join {{ .Values.zerotier.networkId }}
+    echo "Adding Docker network to Zerotier"
+    sudo zerotier-cli allowedips {{ .Values.zerotier.networkId }} add {{ .Values.docker.zeroTierNetwork }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "docker.fullname" . }}-init
+  labels:
+    app: {{ include "docker.name" . }}
+spec:
+  template:
+    metadata:
+      name: {{ include "docker.fullname" . }}-init
+      labels:
+        app: {{ include "docker.name" . }}
+    spec:
+      containers:
+        - name: {{ include "docker.name" . }}-init
+          image: {{ .Values.docker.image }}
+          command: ["/

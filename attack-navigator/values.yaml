@@ -1,0 +1,20 @@
+image:
+  repository: mitre/attack-navigator
+  tag: latest
+
+service:
+  type: ClusterIP
+  port: 80
+
+env:
+  - name: ATTACK_NAVIGATOR_BASE_URL
+    value: "/attack-navigator"
+
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  hosts:
+    - attack-navigator.example.com
+  paths:
+    - /attack-navigator(/|$)(.*)

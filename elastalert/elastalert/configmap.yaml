@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elastalert-config
+data:
+  elastalert_config.yaml: |
+    rules_folder: /opt/rules
+    run_every:
+      minutes: 5
+    buffer_time:
+      minutes: 15
+    es_host: elasticsearch
+    es_port: 9200
+    writeback_index: elastalert_status
+    use_ssl: false
+    verify_certs: true
+    rules_loader:
+      filesystem:
+        path: /opt/rules
+    alert:
+    - "email"
+    email:
+      smtp_host: "smtp.gmail.com"
+      smtp_port: 587
+      smtp_auth_file: /opt/config/smtp_auth_file.yaml
+      email_reply_to: "security@example.com"
+      email_subject: "ElastAlert"
+      from_addr: "security@example.com"
+      to_addr: "security@example.com"
+      type: "email"
+    alert_email:
+      - "security@example.com"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elastalert-rules
+data:
+  example_rule.yaml: |
+    name: Example rule
+    type: any
+    index: test_index
+    filter
