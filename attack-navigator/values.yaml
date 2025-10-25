@@ -2,6 +2,17 @@ image:
   repository: mitre/attack-navigator
   tag: latest
 
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
 service:
   type: ClusterIP
   port: 80
@@ -15,6 +26,7 @@ ingress:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
   hosts:
-    - attack-navigator.example.com
-  paths:
-    - /attack-navigator(/|$)(.*)
+    - host: attack-navigator.example.com
+      paths:
+        - path: /attack-navigator(/|$)(.*)
+          pathType: ImplementationSpecific
