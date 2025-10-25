@@ -2,7 +2,7 @@
 ##
 image:
   repository: docker.elastic.co/elasticsearch/elasticsearch
-  tag: 7.12.1
+  tag: 8.11.0
   pullPolicy: IfNotPresent
 
 nameOverride: ""

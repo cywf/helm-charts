@@ -3,7 +3,7 @@ replicaCount: 1
 
 image:
   repository: grafana/grafana
-  tag: latest
+  tag: "10.2.0"
   pullPolicy: IfNotPresent
 
 nameOverride: "grafana"

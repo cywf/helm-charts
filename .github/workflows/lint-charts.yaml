@@ -1,0 +1,48 @@
+name: Lint Helm Charts
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: '3.13.0'
+
+      - name: Lint all charts
+        run: |
+          set -e
+          failed_charts=()
+          for chart in $(find . -name "Chart.yaml" -type f | sed 's|/Chart.yaml||' | sort); do
+            echo "Linting $chart..."
+            if ! helm lint "$chart"; then
+              failed_charts+=("$chart")
+            fi
+          done
+          
+          if [ ${#failed_charts[@]} -ne 0 ]; then
+            echo "::error::Failed to lint the following charts:"
+            printf '%s\n' "${failed_charts[@]}"
+            exit 1
+          fi
+          
+          echo "✅ All charts passed linting!"
+
+      - name: Validate chart versions
+        run: |
+          echo "Checking for proper versioning..."
+          for chart in $(find . -name "Chart.yaml" -type f | sort); do
+            name=$(grep '^name:' "$chart" | awk '{print $2}')
+            version=$(grep '^version:' "$chart" | awk '{print $2}')
+            appVersion=$(grep '^appVersion:' "$chart" | awk '{print $2}')
+            echo "✓ $name - chart: $version, app: $appVersion"
+          done
