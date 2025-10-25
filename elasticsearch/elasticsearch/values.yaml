@@ -8,6 +8,17 @@ image:
 nameOverride: ""
 fullnameOverride: ""
 
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
 resources:
   limits:
     cpu: 1
@@ -29,6 +40,8 @@ ingress:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/proxy-body-size: "100m"
-  path: /elasticsearch
   hosts:
-    - elasticsearch.example.com
+    - host: elasticsearch.example.com
+      paths:
+        - path: /elasticsearch
+          pathType: ImplementationSpecific

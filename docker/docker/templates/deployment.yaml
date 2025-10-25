@@ -1,67 +1,3 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ include "docker.fullname" . }}
-  labels:
-    {{- include "docker.labels" . | nindent 4 }}
-spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
-  selector:
-    matchLabels:
-      {{- include "docker.selectorLabels" . | nindent 6 }}
-  template:
-    metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      labels:
-        {{- include "docker.selectorLabels" . | nindent 8 }}
-    spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "docker.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      containers:
-        - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-
----
-
 # templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -145,4 +81,14 @@ spec:
       containers:
         - name: {{ include "docker.name" . }}-init
           image: {{ .Values.docker.image }}
-          command: ["/
+          command: ["/bin/sh"]
+          args: ["-c", "/scripts/init-script.sh"]
+          volumeMounts:
+            - name: init-script
+              mountPath: /scripts
+      volumes:
+        - name: init-script
+          configMap:
+            name: {{ include "docker.fullname" . }}-init-script
+            defaultMode: 0755
+      restartPolicy: OnFailure

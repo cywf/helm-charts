@@ -1,9 +1,22 @@
 image:
   repository: cyberchef/cyberchef
   tag: latest
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
 service:
   type: ClusterIP
   port: 80
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
 ingress:
   enabled: true
   annotations:
