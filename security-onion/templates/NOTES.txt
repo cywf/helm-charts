@@ -1,0 +1,41 @@
+Security Onion has been deployed!
+
+⚠️  IMPORTANT: This is a basic deployment structure for Security Onion.
+   Security Onion is a complex platform with multiple components including:
+   - Elasticsearch
+   - Logstash
+   - Kibana
+   - Zeek
+   - Suricata
+   - Wazuh
+   - And many more...
+
+{{ if not .Values.security.escalated }}
+⚠️  WARNING: Running with limited privileges.
+   For full Security Onion functionality, enable escalated security:
+   
+   helm upgrade {{ .Release.Name }} {{ .Chart.Name }} \
+     --set security.escalated=true
+{{ end }}
+
+For a complete Security Onion deployment, you should:
+
+1. Deploy individual components separately:
+   - elasticsearch
+   - kibana
+   - zeek
+   - suricata
+   - wazuh
+   - etc.
+
+2. Check the Security Onion documentation for proper configuration:
+   https://docs.securityonion.net/
+
+3. View the deployment status:
+   kubectl get pods -l "app.kubernetes.io/name={{ include "security-onion.name" . }}"
+
+4. View logs:
+   kubectl logs -l "app.kubernetes.io/name={{ include "security-onion.name" . }}"
+
+Note: This chart provides a starting point. You may need to deploy
+additional charts from this repository for a complete Security Onion stack.

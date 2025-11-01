@@ -1,19 +1,18 @@
 apiVersion: v2
-name: curator
-description: Elasticsearch Curator index management
+name: docker
+description: Docker-in-Kubernetes utilities
 type: application
 version: 0.1.0
-appVersion: "5.8.4"
+appVersion: "24.0.0"
 kubeVersion: ">=1.28.0-0"
 home: https://github.com/cywf/helm-charts
 sources:
   - https://github.com/cywf/helm-charts
-  - https://github.com/elastic/curator
+  - https://github.com/docker/docker-ce
 maintainers:
   - name: cywf
     url: https://github.com/cywf
 keywords:
-  - curator
-  - elasticsearch
-  - index-management
-  - maintenance
+  - docker
+  - container
+  - utilities

@@ -1,0 +1,17 @@
+target-branch: main
+chart-dirs:
+  - .
+chart-repos:
+  - bitnami=https://charts.bitnami.com/bitnami
+  - grafana=https://grafana.github.io/helm-charts
+  - prometheus-community=https://prometheus-community.github.io/helm-charts
+  - elastic=https://helm.elastic.co
+  - harbor=https://helm.goharbor.io
+  - argo=https://argoproj.github.io/argo-helm
+  - kyverno=https://kyverno.github.io/kyverno
+  - cert-manager=https://charts.jetstack.io
+  - ingress-nginx=https://kubernetes.github.io/ingress-nginx
+  - external-dns=https://kubernetes-sigs.github.io/external-dns
+  - minio=https://charts.min.io
+helm-extra-args: --timeout 10m
+validate-maintainers: false

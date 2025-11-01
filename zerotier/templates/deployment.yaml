@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "zerotier.fullname" . }}
+  labels:
+    {{- include "zerotier.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "zerotier.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "zerotier.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "zerotier.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- if .Values.security.escalated }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
+        {{- else }}
+        # WARNING: ZeroTier requires escalated privileges to function
+        # Set security.escalated=true to enable
+        securityContext:
+          runAsNonRoot: true
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        {{- end }}
+        env:
+        {{- if .Values.zerotier.autoCreate }}
+        - name: ZT_NC_AUTO_CREATE
+          value: "{{ .Values.zerotier.autoCreate | ternary "1" "0" }}"
+        {{- end }}
+        {{- if .Values.zerotier.networkId }}
+        - name: ZT_NC_NETWORK
+          value: {{ .Values.zerotier.networkId | quote }}
+        {{- end }}
+        {{- if .Values.zerotier.accessToken }}
+        - name: ZT_NC_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "zerotier.fullname" . }}
+              key: access-token
+        {{- end }}
+        ports:
+        - name: api
+          containerPort: 9993
+          protocol: TCP
+        volumeMounts:
+        - name: zerotier-data
+          mountPath: /var/lib/zerotier-one
+        {{- with .Values.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      volumes:
+      - name: zerotier-data
+        {{- if .Values.persistence.enabled }}
+        {{- if .Values.persistence.hostPath }}
+        hostPath:
+          path: {{ .Values.persistence.hostPath }}
+          type: DirectoryOrCreate
+        {{- else }}
+        persistentVolumeClaim:
+          claimName: {{ include "zerotier.fullname" . }}
+        {{- end }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

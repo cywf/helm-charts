@@ -1,19 +1,17 @@
 apiVersion: v2
-name: curator
-description: Elasticsearch Curator index management
-type: application
+name: lib-common
+description: Common library chart providing shared helpers and templates for cywf/helm-charts
+type: library
 version: 0.1.0
-appVersion: "5.8.4"
+appVersion: "1.0"
 kubeVersion: ">=1.28.0-0"
 home: https://github.com/cywf/helm-charts
 sources:
   - https://github.com/cywf/helm-charts
-  - https://github.com/elastic/curator
 maintainers:
   - name: cywf
     url: https://github.com/cywf
 keywords:
-  - curator
-  - elasticsearch
-  - index-management
-  - maintenance
+  - library
+  - common
+  - helpers
