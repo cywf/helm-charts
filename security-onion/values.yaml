@@ -1,0 +1,63 @@
+# Default values for security-onion
+# Note: Security Onion is a complex platform with many components
+# This chart provides a basic deployment structure
+
+replicaCount: 1
+
+image:
+  repository: securityonionsolutions/so-import
+  pullPolicy: IfNotPresent
+  tag: "2.3"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Create dedicated namespace
+createNamespace: false
+namespace: security-onion
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+# Security Onion requires elevated privileges
+security:
+  escalated: false
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Persistence for Security Onion data
+persistence:
+  enabled: true
+  storageClass: ""
+  size: 100Gi
+
+networkPolicy:
+  enabled: false
+
+monitoring:
+  enabled: false
+
+# RBAC permissions for Security Onion
+rbac:
+  create: true
+  # Cluster-wide permissions required
+  clusterRole: true

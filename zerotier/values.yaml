@@ -1,0 +1,65 @@
+# Default values for zerotier
+replicaCount: 1
+
+image:
+  repository: zerotier/zerotier-one
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# ZeroTier network configuration
+zerotier:
+  # Network ID to join
+  networkId: ""
+  # Network access token (optional)
+  accessToken: ""
+  # Auto-create network controller
+  autoCreate: true
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+# Security context - ZeroTier requires elevated privileges
+security:
+  # Enable escalated security context (required for ZeroTier to function)
+  escalated: false
+
+podSecurityContext: {}
+
+# Container security context
+securityContext:
+  privileged: true  # Required for network manipulation
+
+service:
+  type: ClusterIP
+  port: 9993
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Persistence for ZeroTier state
+persistence:
+  enabled: true
+  # Use hostPath for ZeroTier state
+  hostPath: /var/lib/zerotier-one
+  # Alternative: use PVC
+  # storageClass: ""
+  # size: 1Gi
+
+networkPolicy:
+  enabled: false
+
+monitoring:
+  enabled: false

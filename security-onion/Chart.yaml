@@ -1,0 +1,21 @@
+apiVersion: v2
+name: security-onion
+description: Security Onion Network Security Monitoring platform for Kubernetes
+type: application
+version: 0.1.0
+appVersion: "2.3"
+kubeVersion: ">=1.28.0-0"
+home: https://github.com/cywf/helm-charts
+sources:
+  - https://github.com/cywf/helm-charts
+  - https://github.com/Security-Onion-Solutions/securityonion
+maintainers:
+  - name: cywf
+    url: https://github.com/cywf
+keywords:
+  - security
+  - monitoring
+  - ids
+  - ips
+  - nids
+  - siem
