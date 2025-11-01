@@ -1,0 +1,48 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+node_modules/
+vendor/
+
+# Helm
+*.tgz
+.cr-release-packages/
+.cr-index/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+.DS_Store
+
+# Build artifacts
+dist/
+build/
+target/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Chart dependencies
+charts/*/charts/
+requirements.lock
+Chart.lock
+
+# Secrets and local config
+*.secret
+.env
+.env.local

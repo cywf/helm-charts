@@ -1,0 +1,17 @@
+apiVersion: v2
+name: lib-common
+description: Common library chart providing shared helpers and templates for cywf/helm-charts
+type: library
+version: 0.1.0
+appVersion: "1.0"
+kubeVersion: ">=1.28.0-0"
+home: https://github.com/cywf/helm-charts
+sources:
+  - https://github.com/cywf/helm-charts
+maintainers:
+  - name: cywf
+    url: https://github.com/cywf
+keywords:
+  - library
+  - common
+  - helpers
